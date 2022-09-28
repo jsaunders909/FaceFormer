@@ -15,7 +15,7 @@ import tempfile
 from subprocess import call
 # os.environ['PYOPENGL_PLATFORM'] = 'osmesa' # egl
 import pyrender
-# from psbody.mesh import Mesh
+from psbody.mesh import Mesh
 import trimesh
 
 @torch.no_grad()
@@ -199,7 +199,7 @@ def main():
     args = parser.parse_args()   
 
     test_model(args)
-    # render_sequence(args)
+    render_sequence(args)
 
 if __name__=="__main__":
     main()
