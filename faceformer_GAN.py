@@ -137,12 +137,12 @@ class FaceformerGAN(nn.Module):
         self.vertice_out = vertice_out + template
         self.vertice = vertice
 
-    def forward_G(self, criterion):
+    def forward_G(self, criterion, D):
         recon_loss = criterion(self.vertice_out, self.vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
         D_input_fake = self.vertice_out
 
-        pred = self.D(D_input_fake)
+        pred = D(D_input_fake)
         G_loss_GAN = self.GAN_criterion(pred, torch.ones_like(pred))
         G_loss = (self.w_recon * recon_loss) + (self.w_GAN * G_loss_GAN)
 

@@ -44,7 +44,7 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             D_optimizer.step()
 
             # -------------- Generator ---------------
-            G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion)
+            G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
             G_loss.backward()
 
             G_loss_log.append(G_loss.item())
@@ -71,7 +71,7 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
                 iter = train_subjects_list.index(condition_subject)
                 one_hot = one_hot_all[:,iter,:]
                 model(audio, template,  vertice, one_hot, criterion)
-                G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion)
+                G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
                 valid_loss_log.append(recon_loss.item())
             else:
                 for iter in range(one_hot_all.shape[-1]):
