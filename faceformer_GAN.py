@@ -90,7 +90,7 @@ class FaceformerGAN(nn.Module):
         nn.init.constant_(self.vertice_map_r.bias, 0)
 
         # Discriminator TODO: Get all the arguments for this
-        self.D = Discriminator(args.feature_dim, 512)
+        self.D = Discriminator(args.vertice_dim, 128)
         self.GAN_criterion = nn.MSELoss()
         self.w_GAN = args.w_GAN
         self.w_recon = args.w_recon
