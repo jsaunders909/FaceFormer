@@ -39,7 +39,7 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             # -------------- Discriminator ---------------
             D_optimizer.zero_grad()
             D_loss, D_loss_real, D_loss_fake = model.forward_D(D)
-            if D_loss > 0.05:
+            if D_loss > 0.05 * args.w_GAN:
                 D_loss.backward()
             D_optimizer.step()
 
