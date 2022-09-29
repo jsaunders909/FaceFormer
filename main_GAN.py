@@ -46,8 +46,8 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
                 optimizer.step()
                 optimizer.zero_grad()
 
-            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.3f} D GAN REAL {:.3f} D GAN FAKE {:.3f}".format((e+1),
-                   iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log)))
+            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.3f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.3f}".format((e+1),
+                   iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log))) / 2)
         # validation
         valid_loss_log = []
         model.eval()
@@ -135,7 +135,7 @@ def main():
        " FaceTalk_170908_03277_TA")
     parser.add_argument("--test_subjects", type=str, default="FaceTalk_170809_00138_TA"
        " FaceTalk_170731_00024_TA")
-    parser.add_argument('--w_GAN', type=float, default=0.001, help='Weighting of GAN loss')
+    parser.add_argument('--w_GAN', type=float, default=0.05, help='Weighting of GAN loss')
     parser.add_argument('--w_recon', type=float, default=1., help='Weighting of L1 loss')
     parser.add_argument('--GAN_arch', type=str, default='TCN', help='Type of architecture for the discriminator')
     parser.add_argument('--GAN_type', type=str, default='vertex_only', help='Type discriminator input (TODO)')
