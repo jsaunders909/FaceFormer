@@ -8,11 +8,13 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from Discriminator import Discriminator
+
 
 from data_loader import get_dataloaders
 from faceformer_GAN import FaceformerGAN
 
-def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=100):
+def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, criterion, epoch=100):
     save_path = os.path.join(args.dataset,args.save_path)
     if os.path.exists(save_path):
         shutil.rmtree(save_path)
@@ -25,16 +27,25 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
         # train
         model.train()
         pbar = tqdm(enumerate(train_loader),total=len(train_loader), position=0, leave=True)
-        optimizer.zero_grad()
+        G_optimizer.zero_grad()
 
         for i, (audio, vertice, template, one_hot, file_name) in pbar:
             iteration += 1
             # to gpu
             audio, vertice, template, one_hot = audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot.to(device="cuda")
-            G_loss, D_loss, recon_loss, G_loss_GAN, D_loss_real, D_loss_fake = model(audio, template,  vertice, one_hot, criterion, teacher_forcing=False)
-            G_loss.backward()
+            # Forward pass
+            model(audio, template,  vertice, one_hot, teacher_forcing=False)
+
+            # -------------- Discriminator ---------------
+            D_optimizer.zero_grad()
+            D_loss, D_loss_real, D_loss_fake = model.forward_D(D)
             if D_loss > 0.05:
                 D_loss.backward()
+            D_optimizer.step()
+
+            # -------------- Generator ---------------
+            G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion)
+            G_loss.backward()
 
             G_loss_log.append(G_loss.item())
             D_loss_log.append(D_loss.item())
@@ -43,8 +54,8 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
             D_GAN_real_log.append(D_loss_real.item())
             D_GAN_fake_log.append(D_loss_fake.item())
             if i % args.gradient_accumulation_steps==0:
-                optimizer.step()
-                optimizer.zero_grad()
+                G_optimizer.step()
+                G_optimizer.zero_grad()
 
             pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.3f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.3f}".format((e+1),
                    iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log)) /2))
@@ -59,7 +70,8 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
                 condition_subject = train_subject
                 iter = train_subjects_list.index(condition_subject)
                 one_hot = one_hot_all[:,iter,:]
-                G_loss, D_loss, recon_loss, G_loss_GAN, D_loss_real, D_loss_fake = model(audio, template,  vertice, one_hot, criterion)
+                model(audio, template,  vertice, one_hot, criterion)
+                G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion)
                 valid_loss_log.append(recon_loss.item())
             else:
                 for iter in range(one_hot_all.shape[-1]):
@@ -153,10 +165,12 @@ def main():
     dataset = get_dataloaders(args)
     # loss
     criterion = nn.MSELoss()
+    D = Discriminator(args.vertice_dim, 128)
 
     # Train the model
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
-    model = trainer(args, dataset["train"], dataset["valid"], model, optimizer, criterion, epoch=args.max_epoch)
+    G_optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
+    D_optimizer = torch.optim.Adam(D.parameters(),)
+    model = trainer(args, dataset["train"], dataset["valid"], model, D, G_optimizer, D_optimizer, criterion, epoch=args.max_epoch)
     
     test(args, model, dataset["test"], epoch=args.max_epoch)
     

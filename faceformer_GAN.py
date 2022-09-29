@@ -89,13 +89,11 @@ class FaceformerGAN(nn.Module):
         nn.init.constant_(self.vertice_map_r.weight, 0)
         nn.init.constant_(self.vertice_map_r.bias, 0)
 
-        # Discriminator TODO: Get all the arguments for this
-        self.D = Discriminator(args.vertice_dim, 128)
         self.GAN_criterion = nn.MSELoss()
         self.w_GAN = args.w_GAN
         self.w_recon = args.w_recon
 
-    def forward(self, audio, template, vertice, one_hot, criterion, teacher_forcing=True):
+    def forward(self, audio, template, vertice, one_hot, teacher_forcing=True):
         # tgt_mask: :math:`(T, T)`.
         # memory_mask: :math:`(T, S)`.
         template = template.unsqueeze(1) # (1,1, V*3)
@@ -136,26 +134,32 @@ class FaceformerGAN(nn.Module):
                 new_output = new_output + style_emb
                 vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
-        vertice_out = vertice_out + template
-        recon_loss = criterion(vertice_out, vertice) # (batch, seq_len, V*3)
+        self.vertice_out = vertice_out + template
+        self.vertice = vertice
+
+    def forward_G(self, criterion):
+        recon_loss = criterion(self.vertice_out, self.vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
-
-        D_input_fake = vertice_out
-        D_input_real = vertice
-        # TODO: Concat other info for other GAN types
-
-        D_real = self.D(D_input_real)
-        D_fake = self.D(D_input_fake.detach())
-        D_loss_real = self.GAN_criterion(D_real, torch.ones_like(D_real))
-        D_loss_fake = self.GAN_criterion(D_fake, torch.zeros_like(D_fake))
-        D_loss = self.w_GAN * (D_loss_real + D_loss_fake) / 2
+        D_input_fake = self.vertice_out
 
         pred = self.D(D_input_fake)
         G_loss_GAN = self.GAN_criterion(pred, torch.ones_like(pred))
         G_loss = (self.w_recon * recon_loss) + (self.w_GAN * G_loss_GAN)
 
-        return G_loss, D_loss, recon_loss, G_loss_GAN, D_loss_real, D_loss_fake
+        return G_loss, recon_loss, G_loss_GAN
 
+    def forward_D(self, D):
+        # TODO: Concat other info for other GAN types
+        D_input_real = self.vertice
+        D_input_fake = self.vertice_out
+
+        D_real = D(D_input_real)
+        D_fake = D(D_input_fake.detach())
+        D_loss_real = self.GAN_criterion(D_real, torch.ones_like(D_real))
+        D_loss_fake = self.GAN_criterion(D_fake, torch.zeros_like(D_fake))
+        D_loss = self.w_GAN * (D_loss_real + D_loss_fake) / 2
+
+        return D_loss, D_loss_real, D_loss_fake
 
     def predict(self, audio, template, one_hot):
         template = template.unsqueeze(1) # (1,1, V*3)
