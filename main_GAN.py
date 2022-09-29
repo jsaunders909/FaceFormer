@@ -24,7 +24,7 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
         G_loss_log, D_loss_log, recon_log, G_GAN_log, D_GAN_real_log, D_GAN_fake_log = [], [], [], [], [], []
         # train
         model.train()
-        pbar = tqdm(enumerate(train_loader),total=len(train_loader))
+        pbar = tqdm(enumerate(train_loader),total=len(train_loader), position=0, leave=True)
         optimizer.zero_grad()
 
         for i, (audio, vertice, template, one_hot, file_name) in pbar:
@@ -47,7 +47,7 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
                 optimizer.zero_grad()
 
             pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.3f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.3f}".format((e+1),
-                   iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log))) / 2)
+                   iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log)) /2))
         # validation
         valid_loss_log = []
         model.eval()
