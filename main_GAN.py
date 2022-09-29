@@ -77,8 +77,9 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
                 for iter in range(one_hot_all.shape[-1]):
                     condition_subject = train_subjects_list[iter]
                     one_hot = one_hot_all[:,iter,:]
-                    loss = model(audio, template,  vertice, one_hot, criterion)
-                    valid_loss_log.append(loss.item())
+                    model(audio, template, vertice, one_hot, criterion)
+                    G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
+                    valid_loss_log.append(recon_loss.item())
                         
         current_loss = np.mean(valid_loss_log)
         
