@@ -57,7 +57,7 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
                 G_optimizer.step()
                 G_optimizer.zero_grad()
 
-            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.3f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.3f}".format((e+1),
+            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.5f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.5f}".format((e+1),
                    iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log)) /2))
         # validation
         valid_loss_log = []
@@ -165,11 +165,11 @@ def main():
     dataset = get_dataloaders(args)
     # loss
     criterion = nn.MSELoss()
-    D = Discriminator(args.vertice_dim, 128).to(args.device)
+    D = Discriminator(args.vertice_dim, 512).to(args.device)
 
     # Train the model
     G_optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
-    D_optimizer = torch.optim.Adam(D.parameters(),)
+    D_optimizer = torch.optim.Adam(D.parameters(), lr=args.lr)
     model = trainer(args, dataset["train"], dataset["valid"], model, D, G_optimizer, D_optimizer, criterion, epoch=args.max_epoch)
     
     test(args, model, dataset["test"], epoch=args.max_epoch)
