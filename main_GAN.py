@@ -61,7 +61,11 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             D_GAN_real_log.append(D_loss_real.item())
             D_GAN_fake_log.append(D_loss_fake.item())
 
-            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.5f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.5f}".format((e+1),
+            for log in [G_loss_log, D_loss_log, recon_log, G_GAN_log, D_GAN_real_log, D_GAN_fake_log]:
+                if len(log) > 50:
+                    log.pop(0)
+
+            pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN:{:.5f} D GAN REAL:{:.3f} D GAN FAKE:{:.3f} D LOSS:{:.5f}".format((e+1),
                    iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log)) /2))
         # validation
         valid_loss_log = []
