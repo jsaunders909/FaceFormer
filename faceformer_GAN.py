@@ -143,7 +143,7 @@ class FaceformerGAN(nn.Module):
         D_input_fake = self.vertice_out
 
         pred = D(D_input_fake)
-        G_loss_GAN = self.GAN_criterion(pred, torch.ones_like(pred))
+        G_loss_GAN = (pred - torch.ones_like(pred)**2).mean()
         G_loss = (self.w_recon * recon_loss) + (self.w_GAN * G_loss_GAN)
 
         return G_loss, recon_loss, G_loss_GAN
@@ -155,8 +155,8 @@ class FaceformerGAN(nn.Module):
 
         D_real = D(D_input_real)
         D_fake = D(D_input_fake.detach())
-        D_loss_real = self.GAN_criterion(D_real, torch.ones_like(D_real))
-        D_loss_fake = self.GAN_criterion(D_fake, torch.zeros_like(D_fake))
+        D_loss_real = (D_real - torch.ones_like(D_real) ** 2).mean()
+        D_loss_fake = (D_fake - torch.zeros_like(D_fake) ** 2).mean()
         D_loss = self.w_GAN * (D_loss_real + D_loss_fake)
 
         return D_loss, D_loss_real, D_loss_fake

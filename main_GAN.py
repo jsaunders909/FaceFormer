@@ -43,6 +43,8 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             D_loss, D_loss_real, D_loss_fake = model.forward_D(D)
             if D_loss > 0.05 * args.w_GAN:
                 D_loss.backward()
+            else:
+                print('D not training')
             D_optimizer.step()
 
             # -------------- Generator ---------------
@@ -50,6 +52,8 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
             if G_loss > 0.05 * args.w_GAN:
                 G_loss.backward()
+            else:
+                print('G not training')
             G_optimizer.step()
 
             G_loss_log.append(G_loss.item())
