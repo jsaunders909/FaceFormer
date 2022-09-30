@@ -157,7 +157,7 @@ class FaceformerGAN(nn.Module):
         D_fake = D(D_input_fake.detach())
         D_loss_real = self.GAN_criterion(D_real, torch.ones_like(D_real))
         D_loss_fake = self.GAN_criterion(D_fake, torch.zeros_like(D_fake))
-        D_loss = self.w_GAN * (D_loss_real + D_loss_fake) / 2
+        D_loss = self.w_GAN * (D_loss_real + D_loss_fake)
 
         return D_loss, D_loss_real, D_loss_fake
 

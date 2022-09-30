@@ -33,6 +33,8 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             iteration += 1
             # to gpu
             audio, vertice, template, one_hot = audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot.to(device="cuda")
+
+
             # Forward pass
             model(audio, template,  vertice, one_hot, teacher_forcing=False)
 
