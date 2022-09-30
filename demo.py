@@ -174,8 +174,8 @@ def render_sequence(args):
     file_name = test_name+"_"+args.subject+"_condition_"+args.condition
 
     video_fname = os.path.join(output_path, file_name+'.mp4')
-    cmd = ('ffmpeg' + ' -i {0} -pix_fmt yuv420p -qscale 0 {1}'.format(
-       tmp_video_file.name, video_fname)).split()
+    cmd = ('ffmpeg' + ' -i {0} -i {1} -pix_fmt yuv420p -qscale 0 {2}'.format(
+       tmp_video_file.name, wav_path, video_fname)).split()
     call(cmd)
 
 def main():
