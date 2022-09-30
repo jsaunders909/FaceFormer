@@ -95,7 +95,6 @@ class FaceformerGAN(nn.Module):
 
     def forward(self, audio, template, vertice, one_hot, teacher_forcing=True):
 
-        print(vertice.shape)
         # tgt_mask: :math:`(T, T)`.
         # memory_mask: :math:`(T, S)`.
         template = template.unsqueeze(1) # (1,1, V*3)
@@ -144,7 +143,7 @@ class FaceformerGAN(nn.Module):
         recon_loss = criterion(vertice_out, vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
 
-        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))
+        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))[..., -1, :]
 
         real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
         fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
@@ -161,10 +160,9 @@ class FaceformerGAN(nn.Module):
         D_input_real = torch.cat((vertice, vertice_input), dim=-1)
         D_input_fake = torch.cat((vertice_out, vertice_input), dim=-1)
 
-        print(D_input_real.shape)
-
-        D_real = D(D_input_real)
-        D_fake = D(D_input_fake.detach())
+        # We only care about the prediction of the last timestep
+        D_real = D(D_input_real)[..., -1, :]
+        D_fake = D(D_input_fake.detach())[..., -1, :]
 
         real_label = torch.ones_like(D_real) - (0.05 * torch.randn_like(D_real)).abs()
         fake_label = torch.zeros_like(D_fake) + (0.05 * torch.randn_like(D_real)).abs()
