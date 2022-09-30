@@ -157,8 +157,11 @@ class FaceformerGAN(nn.Module):
     def forward_D(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
         # TODO: Concat other info for other GAN types
         vertice_out, vertice_input = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
+
         D_input_real = torch.cat((vertice, vertice_input), dim=-1)
         D_input_fake = torch.cat((vertice_out, vertice_input), dim=-1)
+
+        print(D_input_real.shape)
 
         D_real = D(D_input_real)
         D_fake = D(D_input_fake.detach())
