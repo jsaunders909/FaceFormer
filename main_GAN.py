@@ -174,7 +174,7 @@ def main():
     dataset = get_dataloaders(args)
     # loss
     criterion = nn.MSELoss()
-    D = Discriminator(args.vertice_dim, 512).to(args.device)
+    D = Discriminator(args.vertice_dim * 2, 512).to(args.device)
 
     # Train the model
     G_optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
