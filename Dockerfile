@@ -8,3 +8,4 @@ RUN cd mesh && make all
 RUN apt-get install -y python3-opengl
 RUN pip install PyOpenGL PyOpenGL-accelerate
 RUN apt-get install -y libosmesa6
+RUN apt-get install -y libpython3.6
