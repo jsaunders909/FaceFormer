@@ -137,11 +137,12 @@ class FaceformerGAN(nn.Module):
         return vertice_out
 
     def forward_G(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
-        recon_loss = criterion(self.vertice_out, self.vertice)  # (batch, seq_len, V*3)
-        recon_loss = torch.mean(recon_loss)
-        D_input_fake = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
+        vertice_out = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
 
-        pred = D(D_input_fake)
+        recon_loss = criterion(vertice_out, vertice)  # (batch, seq_len, V*3)
+        recon_loss = torch.mean(recon_loss)
+
+        pred = D(vertice_out)
 
         real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
         fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
