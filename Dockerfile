@@ -5,5 +5,5 @@ RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com `apt-get update 2>&
 RUN apt-get install -y libboost-dev libsndfile-dev libgl1 freeglut3-dev git
 RUN git clone https://github.com/MPI-IS/mesh.git
 RUN cd mesh && make all
-RUN apt-get install build-essential cmake
+RUN apt-get install -y build-essential cmake
 RUN cd mesh/mesh/cmake && cmake ..
