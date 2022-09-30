@@ -5,4 +5,4 @@ RUN apt-key adv --recv-keys --keyserver keyserver.ubuntu.com `apt-get update 2>&
 RUN apt-get install -y libboost-dev libsndfile-dev libgl1 freeglut3-dev git
 RUN git clone https://github.com/MPI-IS/mesh.git
 RUN cd mesh && make all
-RUN ls -la
+RUN cd mesh && ls -la
