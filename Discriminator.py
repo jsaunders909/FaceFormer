@@ -67,7 +67,6 @@ class TemporalConvNet(nn.Module):
         x = self.net(x)                            # (N, H, 1, T)
         x = x[:, :, 0, :].permute((0, 2, 1))       # (N, T, H)
         x = self.dec(x)                            # (N, T, C_out)
-        print(x.shape)
         return x
 
 
