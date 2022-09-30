@@ -94,6 +94,8 @@ class FaceformerGAN(nn.Module):
         self.w_recon = args.w_recon
 
     def forward(self, audio, template, vertice, one_hot, teacher_forcing=True):
+
+        print(vertice.shape)
         # tgt_mask: :math:`(T, T)`.
         # memory_mask: :math:`(T, S)`.
         template = template.unsqueeze(1) # (1,1, V*3)
@@ -134,15 +136,15 @@ class FaceformerGAN(nn.Module):
                 new_output = new_output + style_emb
                 vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
-        return vertice_out
+        return vertice_out, vertice_input
 
     def forward_G(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
-        vertice_out = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
+        vertice_out, vertice_input = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
 
         recon_loss = criterion(vertice_out, vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
 
-        pred = D(vertice_out)
+        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))
 
         real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
         fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
@@ -154,8 +156,9 @@ class FaceformerGAN(nn.Module):
 
     def forward_D(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
         # TODO: Concat other info for other GAN types
-        D_input_real = vertice
-        D_input_fake = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
+        vertice_out, vertice_input = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
+        D_input_real = torch.cat((vertice, vertice_input), dim=-1)
+        D_input_fake = torch.cat((vertice_out, vertice_input), dim=-1)
 
         D_real = D(D_input_real)
         D_fake = D(D_input_fake.detach())
