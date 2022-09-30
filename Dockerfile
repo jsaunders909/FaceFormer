@@ -6,4 +6,5 @@ RUN apt-get install -y libboost-dev libsndfile-dev libgl1 freeglut3-dev git
 RUN git clone https://github.com/MPI-IS/mesh.git
 RUN cd mesh && make all
 RUN apt-get install -y build-essential cmake
+RUN apt-get install -y python3-dev
 RUN cd mesh/mesh/cmake && cmake ..
