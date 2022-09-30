@@ -106,16 +106,24 @@ class Discriminator(nn.Module):
 
         super(Discriminator, self).__init__()
 
+        print(' ----------------------- Model Summary ------------------------ ')
         if model_type == 'TCN':
             self.model = TemporalConvNet(in_features, 1, h_dim, [7, 5, 3, 3])
+            print('Using TCN')
         elif model_type == 'GRU':
             self.model = RNN(in_features, 1, h_dim, type='GRU', bidirectional=False)
+            print('Using GRU')
         elif model_type == 'biGRU':
             self.model = RNN(in_features, 1, h_dim, type='GRU', bidirectional=True)
+            print('Using biGRU')
         elif model_type == 'LSTM':
             self.model = RNN(in_features, 1, h_dim, type='LSTM', bidirectional=False)
+            print('Using LSTM')
         elif model_type == 'biLSTM':
             self.model = RNN(in_features, 1, h_dim, type='LSTM', bidirectional=True)
+            print('Using biLSTM')
+        print(f'H Dim = {h_dim}')
+        print(' -------------------------------------------------------------- ')
 
         self.use_sigmoid = use_sigmoid
 
