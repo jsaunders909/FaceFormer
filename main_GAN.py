@@ -44,8 +44,11 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             D_optimizer.step()
 
             # -------------- Generator ---------------
+            G_optimizer.zero_grad()
             G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
-            G_loss.backward()
+            if G_loss > 0.05 * args.w_GAN:
+                G_loss.backward()
+            G_optimizer.step()
 
             G_loss_log.append(G_loss.item())
             D_loss_log.append(D_loss.item())
@@ -53,9 +56,6 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             G_GAN_log.append(G_loss_GAN.item())
             D_GAN_real_log.append(D_loss_real.item())
             D_GAN_fake_log.append(D_loss_fake.item())
-            if i % args.gradient_accumulation_steps==0:
-                G_optimizer.step()
-                G_optimizer.zero_grad()
 
             pbar.set_description("(Epoch {}, iteration {}) TRAIN LOSS RECON:{:.7f} G GAN {:.5f} D GAN REAL {:.3f} D GAN FAKE {:.3f} D LOSS {:.5f}".format((e+1),
                    iteration, np.mean(recon_log), np.mean(G_GAN_log), np.mean(D_GAN_real_log), np.mean(D_GAN_fake_log), (np.mean(D_GAN_real_log) + np.mean(D_GAN_fake_log)) /2))
