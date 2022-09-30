@@ -134,29 +134,36 @@ class FaceformerGAN(nn.Module):
                 new_output = new_output + style_emb
                 vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
-        self.vertice_out = vertice_out + template
-        self.vertice = vertice
+        return vertice_out
 
-    def forward_G(self, criterion, D):
+    def forward_G(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
         recon_loss = criterion(self.vertice_out, self.vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
-        D_input_fake = self.vertice_out
+        D_input_fake = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
 
         pred = D(D_input_fake)
-        G_loss_GAN = ((pred - torch.ones_like(pred))**2).mean()
+
+        real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
+        fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
+
+        G_loss_GAN = ((pred - real_label)**2).mean()
         G_loss = (self.w_recon * recon_loss) + (self.w_GAN * G_loss_GAN)
 
         return G_loss, recon_loss, G_loss_GAN
 
-    def forward_D(self, D):
+    def forward_D(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
         # TODO: Concat other info for other GAN types
-        D_input_real = self.vertice
-        D_input_fake = self.vertice_out
+        D_input_real = vertice
+        D_input_fake = self.forward(audio, template, vertice, one_hot, teacher_forcing=teacher_forcing)
 
         D_real = D(D_input_real)
         D_fake = D(D_input_fake.detach())
-        D_loss_real = ((D_real - torch.ones_like(D_real)) ** 2).mean()
-        D_loss_fake = ((D_fake - torch.zeros_like(D_fake)) ** 2).mean()
+
+        real_label = torch.ones_like(D_real) - (0.05 * torch.randn_like(D_real)).abs()
+        fake_label = torch.zeros_like(D_fake) + (0.05 * torch.randn_like(D_real)).abs()
+
+        D_loss_real = ((D_real - real_label) ** 2).mean()
+        D_loss_fake = ((D_fake - fake_label) ** 2).mean()
         D_loss = self.w_GAN * (D_loss_real + D_loss_fake)
 
         return D_loss, D_loss_real, D_loss_fake

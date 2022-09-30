@@ -62,11 +62,12 @@ class TemporalConvNet(nn.Module):
 
     def forward(self, x):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
 
-        x = self.enc(x)                            # (N, 2T, H)
-        x = x.permute((0, 2, 1))[:, :, None, :]    # (N, H, 1, 2T)
-        x = self.net(x)                            # (N, H, 1, 2T)
+        x = self.enc(x)                            # (N, T, H)
+        x = x.permute((0, 2, 1))[:, :, None, :]    # (N, H, 1, T)
+        x = self.net(x)                            # (N, H, 1, T)
         x = x[:, :, 0, :].permute((0, 2, 1))       # (N, T, H)
         x = self.dec(x)                            # (N, T, C_out)
+        print(x.shape)
         return x
 
 

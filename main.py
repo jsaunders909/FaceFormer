@@ -31,7 +31,7 @@ def trainer(args, train_loader, dev_loader, model, optimizer, criterion, epoch=1
             iteration += 1
             # to gpu
             audio, vertice, template, one_hot  = audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot.to(device="cuda")
-            loss = model(audio, template,  vertice, one_hot, criterion,teacher_forcing=False)
+            loss = model(audio, template,  vertice, one_hot, criterion, teacher_forcing=False)
             loss.backward()
             loss_log.append(loss.item())
             if i % args.gradient_accumulation_steps==0:

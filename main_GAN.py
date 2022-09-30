@@ -34,22 +34,20 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
             # to gpu
             audio, vertice, template, one_hot = audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot.to(device="cuda")
 
-
-            # Forward pass
-            model(audio, template,  vertice, one_hot, teacher_forcing=False)
-
             # -------------- Discriminator ---------------
             D_optimizer.zero_grad()
-            D_loss, D_loss_real, D_loss_fake = model.forward_D(D)
+            D_loss, D_loss_real, D_loss_fake = model.forward_D(audio, template, vertice, criterion,
+                                                               one_hot, D, teacher_forcing=False)
             if D_loss > 0.05 * args.w_GAN:
                 D_loss.backward()
             else:
                 print('D not training')
             D_optimizer.step()
 
-            # -------------- Generator ---------------
+            # -------------- Generator -------------------
             G_optimizer.zero_grad()
-            G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
+            G_loss, recon_loss, G_loss_GAN = model.forward_G(audio, template, vertice, criterion,
+                                                             one_hot, D, teacher_forcing=False)
             if G_loss > 0.05 * args.w_GAN:
                 G_loss.backward()
             else:
@@ -70,13 +68,12 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
         model.eval()
         for audio, vertice, template, one_hot_all,file_name in dev_loader:
             # to gpu
-            audio, vertice, template, one_hot_all= audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot_all.to(device="cuda")
+            audio, vertice, template, one_hot_all = audio.to(device="cuda"), vertice.to(device="cuda"), template.to(device="cuda"), one_hot_all.to(device="cuda")
             train_subject = "_".join(file_name[0].split("_")[:-1])
             if train_subject in train_subjects_list:
                 condition_subject = train_subject
                 iter = train_subjects_list.index(condition_subject)
                 one_hot = one_hot_all[:,iter,:]
-                model(audio, template,  vertice, one_hot, criterion)
                 G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
                 valid_loss_log.append(recon_loss.item())
             else:
