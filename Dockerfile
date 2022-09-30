@@ -8,5 +8,5 @@ RUN cd mesh && make all
 RUN apt-get install -y build-essential cmake
 RUN apt-get install -y python3-dev
 RUN apt-get install -y sed
-RUN sed -i 's/print numpy.get_include()/print(numpy.get_include())' mesh/mesh/cmake/thirdparty.cmake
+RUN sed -i 's/print numpy.get_include()/print(numpy.get_include())/g' mesh/mesh/cmake/thirdparty.cmake
 RUN cd mesh/mesh/cmake && cmake ..
