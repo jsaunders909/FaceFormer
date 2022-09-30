@@ -187,15 +187,18 @@ def main():
     parser.add_argument("--vertice_dim", type=int, default=5023*3, help='number of vertices - 5023*3 for vocaset; 23370*3 for BIWI')
     parser.add_argument("--device", type=str, default="cuda")
 
-    parser.add_argument("--train_subjects", type=str, default="FaceTalk_170728_03272_TA"
-                                                              "FaceTalk_170904_00128_TA FaceTalk_170725_00137_TA "
+    parser.add_argument("--train_subjects", type=str, default="FaceTalk_170728_03272_TA "
+                                                              "FaceTalk_170904_00128_TA "
+                                                              "FaceTalk_170725_00137_TA "
                                                               "FaceTalk_170915_00223_TA "
-                                                              " FaceTalk_170811_03274_TA FaceTalk_170913_03279_TA"
-                                                              " FaceTalk_170904_03276_TA FaceTalk_170912_03278_TA")
-    parser.add_argument("--val_subjects", type=str, default="FaceTalk_170811_03275_TA"
-                                                            " FaceTalk_170908_03277_TA")
-    parser.add_argument("--test_subjects", type=str, default="FaceTalk_170809_00138_TA"
-                                                             " FaceTalk_170731_00024_TA")
+                                                              "FaceTalk_170811_03274_TA "
+                                                              "FaceTalk_170913_03279_TA "
+                                                              "FaceTalk_170904_03276_TA "
+                                                              "FaceTalk_170912_03278_TA")
+    parser.add_argument("--val_subjects", type=str, default="FaceTalk_170811_03275_TA "
+                                                            " FaceTalk_170908_03277_TA ")
+    parser.add_argument("--test_subjects", type=str, default="FaceTalk_170809_00138_TA "
+                                                             "FaceTalk_170731_00024_TA")
     parser.add_argument("--output_path", type=str, default="demo/output", help='path of the rendered video sequence')
     parser.add_argument("--wav_path", type=str, default="demo/wav/test.wav", help='path of the input audio signal')
     parser.add_argument("--result_path", type=str, default="demo/result", help='path of the predictions')
