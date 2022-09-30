@@ -78,14 +78,15 @@ def trainer(args, train_loader, dev_loader, model, D, G_optimizer, D_optimizer, 
                 condition_subject = train_subject
                 iter = train_subjects_list.index(condition_subject)
                 one_hot = one_hot_all[:,iter,:]
-                G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
+                G_loss, recon_loss, G_loss_GAN = model.forward_G(audio, template, vertice, criterion,
+                                                                 one_hot, D)
                 valid_loss_log.append(recon_loss.item())
             else:
                 for iter in range(one_hot_all.shape[-1]):
                     condition_subject = train_subjects_list[iter]
                     one_hot = one_hot_all[:,iter,:]
-                    model(audio, template, vertice, one_hot, criterion)
-                    G_loss, recon_loss, G_loss_GAN = model.forward_G(criterion, D)
+                    G_loss, recon_loss, G_loss_GAN = model.forward_G(audio, template, vertice, criterion,
+                                                             one_hot, D)
                     valid_loss_log.append(recon_loss.item())
                         
         current_loss = np.mean(valid_loss_log)
