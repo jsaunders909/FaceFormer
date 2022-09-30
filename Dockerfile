@@ -7,3 +7,4 @@ RUN git clone https://github.com/MPI-IS/mesh.git
 RUN cd mesh && make all
 RUN apt-get install -y python3-opengl
 RUN pip install PyOpenGL PyOpenGL-accelerate
+RUN apt-get install -y libosmesa6
