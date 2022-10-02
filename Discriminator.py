@@ -95,8 +95,9 @@ class RNN(nn.Module):
         ])
 
     def forward(self, x):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
-
-        x = self.enc(x)                            # (N, 2T, H)
+        print(x.shape)
+        x = self.enc(x)
+        print(x.shape)  # (N, 2T, H)
         _, x = self.net(x)
         x = torch.cat(x, dim=-1).permute((1, 0, 2))
         print(x.shape)
