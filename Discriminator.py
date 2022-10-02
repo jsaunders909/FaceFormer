@@ -79,11 +79,12 @@ class RNN(nn.Module):
                                    FCResBlock(h_channels)])
 
         if type == 'GRU':
-            self.net = nn.GRU(h_channels, h_channels, batch_first=True, bidirectional=bidirectional)
+            self.net = nn.GRU(h_channels, h_channels, batch_first=True, bidirectional=bidirectional, num_layers=n_layers)
         elif type == 'LSTM':
-            self.net = nn.LSTM(h_channels, h_channels, batch_first=True, bidirectional=bidirectional)
+            self.net = nn.LSTM(h_channels, h_channels, batch_first=True, bidirectional=bidirectional, num_layers=n_layers)
 
-        step_down = 2 * h_channels if bidirectional else h_channels
+        D = 2 * h_channels if bidirectional else h_channels
+        step_down = D * n_layers
         self.dec = nn.Sequential(*[
             nn.Linear(step_down, h_channels),
             FCResBlock(h_channels),
@@ -94,7 +95,8 @@ class RNN(nn.Module):
     def forward(self, x):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
 
         x = self.enc(x)                            # (N, 2T, H)
-        x, *_ = self.net(x)                            # (N, H, 1, 2T)
+        _, *x = self.net(x)
+        x = torch.cat(x, dim=-1).permute((1, 0, 2))
         x = self.dec(x)                            # (N, T, C_out)
         return x
 
