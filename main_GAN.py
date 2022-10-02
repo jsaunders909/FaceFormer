@@ -158,8 +158,7 @@ def main():
        " FaceTalk_170731_00024_TA")
     parser.add_argument('--w_GAN', type=float, default=0.05, help='Weighting of GAN loss')
     parser.add_argument('--w_recon', type=float, default=1., help='Weighting of L1 loss')
-    parser.add_argument('--GAN_arch', type=str, default='TCN', help='Type of architecture for the discriminator')
-    parser.add_argument('--GAN_type', type=str, default='vertex_only', help='Type discriminator input (TODO)')
+    parser.add_argument('--GAN_type', type=str, default='TCN', help='Type of architecture for the discriminator')
     args = parser.parse_args()
 
     #build model
@@ -174,7 +173,7 @@ def main():
     dataset = get_dataloaders(args)
     # loss
     criterion = nn.MSELoss()
-    D = Discriminator(args.vertice_dim + args.feature_dim, 512).to(args.device)
+    D = Discriminator(args.vertice_dim + args.feature_dim, 512, model_type=args.GAN_arch).to(args.device)
 
     # Train the model
     G_optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
