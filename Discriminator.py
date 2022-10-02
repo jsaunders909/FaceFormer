@@ -95,13 +95,10 @@ class RNN(nn.Module):
         ])
 
     def forward(self, x):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
-        print(x.shape)
         x = self.enc(x)
-        print(x.shape)  # (N, 2T, H)
         _, x = self.net(x)
         x = torch.cat(x, dim=-1).permute((1, 0, 2))
         x = x.reshape((x.shape[0], -1))
-        print(x.shape)
         x = self.dec(x)                            # (N, T, C_out)
         return x
 
