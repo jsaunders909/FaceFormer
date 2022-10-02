@@ -143,7 +143,7 @@ class FaceformerGAN(nn.Module):
         recon_loss = criterion(vertice_out, vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
 
-        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))[..., -1, :]
+        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))
 
         real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
         fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
@@ -161,8 +161,8 @@ class FaceformerGAN(nn.Module):
         D_input_fake = torch.cat((vertice_out, vertice_input), dim=-1)
 
         # We only care about the prediction of the last timestep
-        D_real = D(D_input_real)[..., -1, :]
-        D_fake = D(D_input_fake.detach())[..., -1, :]
+        D_real = D(D_input_real)
+        D_fake = D(D_input_fake.detach())
 
         real_label = torch.ones_like(D_real) - (0.05 * torch.randn_like(D_real)).abs()
         fake_label = torch.zeros_like(D_fake) + (0.05 * torch.randn_like(D_real)).abs()
