@@ -74,8 +74,11 @@ class RNN(nn.Module):
 
     def __init__(self, in_channels, out_channels, h_channels, type='GRU', n_layers=2, bidirectional=True):
         super(RNN, self).__init__()
-        self.enc = nn.Sequential(*[nn.Linear(in_channels, h_channels),
+        self.enc = nn.Sequential(*[nn.Linear(in_channels, in_channels // 3),
                                    nn.LeakyReLU(),
+                                   nn.Linear(in_channels // 3, in_channels // 30),
+                                   nn.LeakyReLU(),
+                                   nn.Linear(in_channels // 30, h_channels),
                                    FCResBlock(h_channels)])
 
         if type == 'GRU':
