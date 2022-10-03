@@ -17,6 +17,7 @@ os.environ['PYOPENGL_PLATFORM'] = 'osmesa'
 import pyrender
 from psbody.mesh import Mesh
 import trimesh
+import tqdm
 
 @torch.no_grad()
 def test_model(args):
@@ -165,7 +166,7 @@ def render_sequence(args):
     writer = cv2.VideoWriter(tmp_video_file.name, cv2.VideoWriter_fourcc(*'mp4v'), args.fps, (800, 800), True)
     center = np.mean(predicted_vertices[0], axis=0)
 
-    for i_frame in range(num_frames):
+    for i_frame in tqdm(range(num_frames)):
         render_mesh = Mesh(predicted_vertices[i_frame], template.f)
         pred_img = render_mesh_helper(args, render_mesh, center)
         pred_img = pred_img.astype(np.uint8)
