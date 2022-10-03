@@ -136,7 +136,7 @@ class Faceformer(nn.Module):
 
     def predict(self, audio, template, one_hot):
         template = template.unsqueeze(1) # (1,1, V*3)
-        print(template.min(), template.max())
+        print('Template: ', template.min(), template.max())
         obj_embedding = self.obj_vector(one_hot)
         hidden_states = self.audio_encoder(audio, self.dataset).last_hidden_state
         if self.dataset == "BIWI":
