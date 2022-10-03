@@ -199,5 +199,6 @@ class FaceformerGAN(nn.Module):
             new_output = new_output + style_emb
             vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
-        vertice_out = vertice_out + template
+        vertice_out = vertice_out
+        # TODO: Accidentally removed + template add this back in forward!
         return vertice_out
