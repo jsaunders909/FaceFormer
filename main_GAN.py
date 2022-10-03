@@ -173,7 +173,7 @@ def main():
     dataset = get_dataloaders(args)
     # loss
     criterion = nn.MSELoss()
-    n_subjects = args.train_subjects.split(' ')
+    n_subjects = len(args.train_subjects.split(' '))
     D = Discriminator(args.vertice_dim + args.feature_dim, 512, model_type=args.GAN_type, n_cond=n_subjects).to(args.device)
 
     # Train the model
