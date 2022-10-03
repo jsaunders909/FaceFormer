@@ -24,7 +24,7 @@ def test_model(args):
         os.makedirs(args.result_path)
 
     #build model
-    model = FaceformerGAN(args)
+    model = FaceformerGAN(args, mode='test')
     model.load_state_dict(torch.load(os.path.join(args.dataset, '{}.pth'.format(args.model_name))))
     model = model.to(torch.device(args.device))
     model.eval()

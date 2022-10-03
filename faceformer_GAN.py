@@ -61,7 +61,7 @@ class PeriodicPositionalEncoding(nn.Module):
         return self.dropout(x)
 
 class FaceformerGAN(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, mode='train'):
         super(FaceformerGAN, self).__init__()
         """
         audio: (batch_size, raw_wav)
@@ -89,9 +89,10 @@ class FaceformerGAN(nn.Module):
         nn.init.constant_(self.vertice_map_r.weight, 0)
         nn.init.constant_(self.vertice_map_r.bias, 0)
 
-        self.GAN_criterion = nn.MSELoss()
-        self.w_GAN = args.w_GAN
-        self.w_recon = args.w_recon
+        if mode == 'train':
+            self.GAN_criterion = nn.MSELoss()
+            self.w_GAN = args.w_GAN
+            self.w_recon = args.w_recon
 
     def forward(self, audio, template, vertice, one_hot, teacher_forcing=True):
 
