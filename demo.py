@@ -3,7 +3,7 @@ import scipy.io.wavfile as wav
 import librosa
 import os,sys,shutil,argparse,copy,pickle
 import math,scipy
-from faceformer import Faceformer
+from faceformer_GAN import FaceformerGAN
 from transformers import Wav2Vec2FeatureExtractor,Wav2Vec2Processor
 
 import torch
@@ -24,7 +24,7 @@ def test_model(args):
         os.makedirs(args.result_path)
 
     #build model
-    model = Faceformer(args)
+    model = FaceformerGAN(args)
     model.load_state_dict(torch.load(os.path.join(args.dataset, '{}.pth'.format(args.model_name))))
     model = model.to(torch.device(args.device))
     model.eval()
