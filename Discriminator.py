@@ -72,7 +72,7 @@ class TemporalConvNet(nn.Module):
 
 class RNN(nn.Module):
 
-    def __init__(self, in_channels, out_channels, h_channels, type='GRU', n_layers=2, bidirectional=True):
+    def __init__(self, in_channels, out_channels, h_channels, n_cond, type='GRU', n_layers=2, bidirectional=True):
         super(RNN, self).__init__()
         self.enc = nn.Sequential(*[nn.Linear(in_channels, in_channels // 3),
                                    nn.LeakyReLU(),
@@ -91,24 +91,25 @@ class RNN(nn.Module):
         if type=='LSTM':
             step_down *= 2
         self.dec = nn.Sequential(*[
-            nn.Linear(step_down, h_channels),
+            nn.Linear(step_down + n_cond, h_channels),
             FCResBlock(h_channels),
             nn.LeakyReLU(),
             nn.Linear(h_channels, out_channels)
         ])
 
-    def forward(self, x):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
+    def forward(self, x, cond):  # Here x has shape (N, (2)T, C_in) -> (N, T, C_out)
         x = self.enc(x)
         _, x = self.net(x)
         x = torch.cat(x, dim=-1).permute((1, 0, 2))
         x = x.reshape((x.shape[0], -1))
+        x = torch.cat((x, cond), dim=-1)
         x = self.dec(x)                            # (N, T, C_out)
         return x
 
 
 class Discriminator(nn.Module):
 
-    def __init__(self, in_features, h_dim, model_type='TCN', use_sigmoid=True):
+    def __init__(self, in_features, h_dim, n_cond, model_type='TCN', use_sigmoid=True):
 
         super(Discriminator, self).__init__()
 
@@ -117,25 +118,25 @@ class Discriminator(nn.Module):
             self.model = TemporalConvNet(in_features, 1, h_dim, [7, 5, 3, 3])
             print('Using TCN')
         elif model_type == 'GRU':
-            self.model = RNN(in_features, 1, h_dim, type='GRU', bidirectional=False)
+            self.model = RNN(in_features, 1, h_dim, n_cond, type='GRU', bidirectional=False)
             print('Using GRU')
         elif model_type == 'biGRU':
-            self.model = RNN(in_features, 1, h_dim, type='GRU', bidirectional=True)
+            self.model = RNN(in_features, 1, h_dim, n_cond, type='GRU', bidirectional=True)
             print('Using biGRU')
         elif model_type == 'LSTM':
-            self.model = RNN(in_features, 1, h_dim, type='LSTM', bidirectional=False)
+            self.model = RNN(in_features, 1, h_dim, n_cond, type='LSTM', bidirectional=False)
             print('Using LSTM')
         elif model_type == 'biLSTM':
-            self.model = RNN(in_features, 1, h_dim, type='LSTM', bidirectional=True)
+            self.model = RNN(in_features, 1, h_dim, n_cond, type='LSTM', bidirectional=True)
             print('Using biLSTM')
         print(f'H Dim = {h_dim}')
         print(' -------------------------------------------------------------- ')
 
         self.use_sigmoid = use_sigmoid
 
-    def forward(self, x):
+    def forward(self, x, cond):
 
-        x = self.model(x)
+        x = self.model(x, cond)
         if self.use_sigmoid:
             x = torch.sigmoid(x)
         return x

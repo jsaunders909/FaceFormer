@@ -136,6 +136,8 @@ class FaceformerGAN(nn.Module):
                 new_output = new_output + style_emb
                 vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
+        vertice_out = vertice_out + template
+
         return vertice_out, vertice_input
 
     def forward_G(self, audio, template, vertice, criterion, one_hot, D, teacher_forcing=True):
@@ -144,7 +146,7 @@ class FaceformerGAN(nn.Module):
         recon_loss = criterion(vertice_out, vertice)  # (batch, seq_len, V*3)
         recon_loss = torch.mean(recon_loss)
 
-        pred = D(torch.cat((vertice_out, vertice_input), dim=-1))
+        pred = D(torch.cat((vertice_out, vertice_input), dim=-1), one_hot)
 
         real_label = torch.ones_like(pred) - (0.05 * torch.randn_like(pred)).abs()
         fake_label = torch.zeros_like(pred) + (0.05 * torch.randn_like(pred)).abs()
@@ -162,8 +164,8 @@ class FaceformerGAN(nn.Module):
         D_input_fake = torch.cat((vertice_out, vertice_input), dim=-1)
 
         # We only care about the prediction of the last timestep
-        D_real = D(D_input_real)
-        D_fake = D(D_input_fake.detach())
+        D_real = D(D_input_real, one_hot)
+        D_fake = D(D_input_fake.detach(), one_hot)
 
         real_label = torch.ones_like(D_real) - (0.05 * torch.randn_like(D_real)).abs()
         fake_label = torch.zeros_like(D_fake) + (0.05 * torch.randn_like(D_real)).abs()
@@ -200,6 +202,5 @@ class FaceformerGAN(nn.Module):
             new_output = new_output + style_emb
             vertice_emb = torch.cat((vertice_emb, new_output), 1)
 
-        vertice_out = vertice_out
-        # TODO: Accidentally removed + template add this back in forward!
+        vertice_out = vertice_out + template
         return vertice_out
