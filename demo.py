@@ -57,6 +57,7 @@ def test_model(args):
 
     prediction = model.predict(audio_feature, template, one_hot)
     prediction = prediction.squeeze() # (seq_len, V*3)
+    print(prediction.min(), prediction.max())
     np.save(os.path.join(args.result_path, test_name), prediction.detach().cpu().numpy())
 
 # The implementation of rendering is borrowed from VOCA: https://github.com/TimoBolkart/voca/blob/master/utils/rendering.py
@@ -166,7 +167,6 @@ def render_sequence(args):
 
     for i_frame in range(num_frames):
         render_mesh = Mesh(predicted_vertices[i_frame], template.f)
-        print(render_mesh.v.min(axis=0), render_mesh.v.max(axis=0))
         pred_img = render_mesh_helper(args, render_mesh, center)
         pred_img = pred_img.astype(np.uint8)
         writer.write(pred_img)
