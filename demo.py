@@ -166,7 +166,8 @@ def render_sequence(args):
 
     for i_frame in range(num_frames):
         render_mesh = Mesh(predicted_vertices[i_frame], template.f)
-        pred_img = render_mesh_helper(args,render_mesh, center)
+        print(render_mesh.v.min(dim=0), render_mesh.v.max(dim=0))
+        pred_img = render_mesh_helper(args, render_mesh, center)
         pred_img = pred_img.astype(np.uint8)
         writer.write(pred_img)
 
