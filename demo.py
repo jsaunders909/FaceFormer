@@ -17,7 +17,7 @@ os.environ['PYOPENGL_PLATFORM'] = 'osmesa'
 import pyrender
 from psbody.mesh import Mesh
 import trimesh
-import tqdm
+from tqdm import tqdm
 
 @torch.no_grad()
 def test_model(args):
